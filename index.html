@@ -129,6 +129,10 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0 4px;
   }
   .ncard .num.master{background:linear-gradient(180deg,var(--gold),var(--ember));-webkit-background-clip:text;background-clip:text}
+  .ncard .total{
+    font-size:.8rem;color:var(--ivory-dim);margin-bottom:12px;font-variant-numeric:tabular-nums;
+  }
+  .ncard .total b{color:var(--gold);font-weight:700}
   .ncard .keyword{font-weight:700;font-size:1.02rem;margin-bottom:8px}
   .ncard .desc{font-size:.86rem;color:var(--ivory-dim)}
   .ncard .badge{
@@ -212,6 +216,7 @@
         <span class="badge">Master</span>
         <div class="tag">Destiny · Expression</div>
         <div class="num"></div>
+        <div class="total"></div>
         <div class="keyword"></div>
         <div class="desc"></div>
       </div>
@@ -219,6 +224,7 @@
         <span class="badge">Master</span>
         <div class="tag">Soul Urge · Heart</div>
         <div class="num"></div>
+        <div class="total"></div>
         <div class="keyword"></div>
         <div class="desc"></div>
       </div>
@@ -226,6 +232,7 @@
         <span class="badge">Master</span>
         <div class="tag">Personality</div>
         <div class="num"></div>
+        <div class="total"></div>
         <div class="keyword"></div>
         <div class="desc"></div>
       </div>
@@ -276,6 +283,19 @@ function reduce(n){
     n = String(n).split('').reduce((a,d)=>a + (+d), 0);
   }
   return n;
+}
+
+// Build a readable reduction path, e.g. 39 -> "39 → 3+9=12 → 1+2=3"
+function reductionPath(n){
+  const steps = [String(n)];
+  let cur = n;
+  while(cur > 9 && !MASTERS.has(cur)){
+    const digits = String(cur).split('').map(Number);
+    const sum = digits.reduce((a,b)=>a+b,0);
+    steps.push(digits.join('+') + '=' + sum);
+    cur = sum;
+  }
+  return steps.join(' → ');
 }
 
 function analyze(name, sysKey){
@@ -351,6 +371,9 @@ function fillCard(id, type, result){
   const numEl = card.querySelector('.num');
   numEl.textContent = result.num;
   numEl.classList.toggle('master', isMaster);
+  card.querySelector('.total').innerHTML =
+    'Total <b>' + result.total + '</b>' +
+    (result.total !== result.num ? ' · ' + reductionPath(result.total) : '');
   card.querySelector('.keyword').textContent = m.k;
   card.querySelector('.desc').textContent = FRAME[type] + ' ' + m.d;
 }
