@@ -175,6 +175,67 @@
   .ref-item .t b{display:block;margin-bottom:1px}
   .ref-item .t span{color:var(--ivory-dim)}
 
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex;gap:5px;margin:0 auto 26px;max-width:430px;
+    background:var(--indigo);border:1.5px solid var(--indigo-3);border-radius:14px;padding:5px;
+  }
+  .tab{
+    flex:1;font-family:inherit;font-weight:600;font-size:.92rem;color:var(--ivory-dim);
+    background:transparent;border:none;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all .18s;
+  }
+  .tab.active{background:var(--emerald);color:#06231a;box-shadow:0 6px 16px -6px var(--emerald)}
+  .tab:not(.active):hover{color:var(--ivory)}
+  [hidden]{display:none !important}
+
+  /* ---------- Generator ---------- */
+  .gen-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:680px){.gen-grid{grid-template-columns:repeat(2,1fr)}}
+  .gen-field label{
+    display:block;font-weight:600;font-size:.74rem;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--ivory-dim);margin-bottom:8px;
+  }
+  .gen-field select,.gen-field input{
+    width:100%;font-family:inherit;font-size:1rem;color:var(--ivory);
+    background:var(--indigo);border:1.5px solid var(--indigo-3);border-radius:11px;
+    padding:12px;outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .gen-field select:focus,.gen-field input:focus{border-color:var(--emerald);box-shadow:0 0 0 4px rgba(29,158,117,.16)}
+  .gen-field input::placeholder{color:#5f6b8f}
+
+  #genList{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .gname{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:var(--indigo-2);border:1px solid var(--indigo-3);border-radius:14px;padding:14px 18px;
+    transition:border-color .2s,transform .2s;
+  }
+  .gname:hover{border-color:var(--emerald);transform:translateY(-2px)}
+  .gname .nm{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;flex:1;min-width:130px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{
+    font-size:.7rem;font-weight:700;letter-spacing:.03em;background:var(--indigo);
+    border:1px solid var(--indigo-3);color:var(--ivory-dim);padding:4px 9px;border-radius:20px;white-space:nowrap;
+  }
+  .chip b{color:var(--emerald-soft)}
+  .dom{display:flex;align-items:center;gap:10px;min-width:158px;justify-content:flex-end;margin-left:auto}
+  .stat{font-size:.78rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .stat::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ivory-dim)}
+  .stat.ok{color:var(--emerald-soft)} .stat.ok::before{background:var(--emerald-soft);box-shadow:0 0 8px var(--emerald-soft)}
+  .stat.no{color:#e0796a} .stat.no::before{background:#e0796a}
+  .stat.un{color:var(--ivory-dim)}
+  .dom a{
+    font-size:.74rem;font-weight:700;color:var(--gold);text-decoration:none;
+    border:1px solid rgba(200,162,75,.4);padding:5px 10px;border-radius:9px;transition:background .2s;white-space:nowrap;
+  }
+  .dom a:hover{background:rgba(200,162,75,.12)}
+  .gen-empty{text-align:center;color:var(--ivory-dim);padding:26px 18px;font-size:.95rem;
+    background:var(--indigo-2);border:1px solid var(--indigo-3);border-radius:14px}
+  .spinner{
+    width:13px;height:13px;border:2px solid var(--indigo-3);border-top-color:var(--emerald);
+    border-radius:50%;display:inline-block;vertical-align:-2px;animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
   footer{text-align:center;color:var(--ivory-dim);font-size:.82rem;margin-top:54px;line-height:1.8}
   footer a{color:var(--gold);text-decoration:none}
   footer a:hover{text-decoration:underline}
@@ -190,6 +251,12 @@
     <p class="sub">Enter your full name to reveal your Destiny, Soul, and Personality numbers — the vibrations hidden inside the letters of your name.</p>
   </header>
 
+  <div class="tabs">
+    <button class="tab active" data-view="analyze">✦ Analyze a name</button>
+    <button class="tab" data-view="generate">✨ Generate a name</button>
+  </div>
+
+  <section id="view-analyze">
   <div class="panel">
     <label class="field-label" for="name">Your full name</label>
     <input id="name" class="name-input" type="text" placeholder="e.g. Milad Ahmed Shaikh" autocomplete="off" spellcheck="false" />
@@ -248,6 +315,44 @@
     <div class="section-title">What each number means</div>
     <div class="ref" id="ref"></div>
   </div>
+  </section>
+
+  <section id="view-generate" hidden>
+    <div class="panel">
+      <div class="gen-grid">
+        <div class="gen-field">
+          <label for="g-exp">Expression / Destiny</label>
+          <select id="g-exp"></select>
+        </div>
+        <div class="gen-field">
+          <label for="g-soul">Soul Urge</label>
+          <select id="g-soul"></select>
+        </div>
+        <div class="gen-field">
+          <label for="g-pers">Personality</label>
+          <select id="g-pers"></select>
+        </div>
+        <div class="gen-field">
+          <label for="g-prefix">Starts with</label>
+          <input id="g-prefix" type="text" placeholder="e.g. Up" autocomplete="off" spellcheck="false" maxlength="6" />
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="system">
+          <label class="field-label">Number system</label>
+          <div class="toggle" id="gToggle">
+            <button data-sys="pythagorean" class="active">Pythagorean</button>
+            <button data-sys="chaldean">Chaldean</button>
+          </div>
+        </div>
+        <button class="calc-btn" id="g-run">Generate names →</button>
+      </div>
+      <p class="hint">Set the numbers you want (leave any as “Any”), optionally fix the starting letters, and we’ll brand-generate matching names with a live <b>.com</b> availability check. Note: Soul&nbsp;+&nbsp;Personality together drive Expression, so some triple-combinations are impossible — if nothing matches, relax one.</p>
+    </div>
+
+    <div id="genResults" style="margin-top:28px"></div>
+  </section>
 
   <footer>
     <div>Built with the Vriddhi system · <a href="#" id="rerun">calculate another name</a></div>
@@ -422,6 +527,144 @@ function run(){
   res.classList.remove('show'); void res.offsetWidth; res.classList.add('show');
   res.scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  const v = tab.dataset.view;
+  $('#view-analyze').hidden = (v !== 'analyze');
+  $('#view-generate').hidden = (v !== 'generate');
+}));
+
+/* ---------------- Name generator ---------------- */
+// Populate the target dropdowns: Any + 1-9 + master numbers
+const NUM_OPTIONS = ['', 1,2,3,4,5,6,7,8,9,11,22,33];
+['#g-exp','#g-soul','#g-pers'].forEach(sel => {
+  $(sel).innerHTML = NUM_OPTIONS.map(n =>
+    `<option value="${n}">${n === '' ? 'Any' : n}</option>`).join('');
+});
+
+let genSys = 'pythagorean';
+$('#gToggle').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if(!btn) return;
+  genSys = btn.dataset.sys;
+  [...$('#gToggle').children].forEach(b => b.classList.toggle('active', b === btn));
+});
+
+// Pronounceable, brandable name building blocks
+const ONSETS = ['b','br','c','ch','cl','cr','d','dr','f','fl','fr','g','gl','gr','h','j','k','l',
+  'm','n','p','pl','pr','r','s','sh','sk','sl','sp','st','t','th','tr','v','w','z'];
+const SOFT   = ['l','n','r','s','m','t','v','d','k','b']; // weight toward soft consonants
+const ONSET_POOL = ONSETS.concat(SOFT, SOFT);
+const NUCLEI = ['a','e','i','o','u','a','e','i','o','ai','ea','ee','io','ou','ia','oa','ie','ue'];
+const CODA   = ['n','r','s','l','x','th','ne','na','no','ia','el','on','us','ix','ah','er','yn','a','o','e'];
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const isVowelChar = c => 'aeiou'.includes(c);
+
+function makeName(prefix){
+  let n = (prefix || '').toLowerCase().replace(/[^a-z]/g,'');
+  let wantC;                                   // do we want a consonant next?
+  if(!n){ n += pick(ONSET_POOL); wantC = false; }   // start on a consonant, then a vowel
+  else  { wantC = isVowelChar(n.slice(-1)); }       // ends in vowel -> consonant next
+  const groups = 3 + Math.floor(Math.random() * 3); // 3..5 alternating groups
+  for(let i = 0; i < groups; i++){
+    n += wantC ? pick(ONSET_POOL) : pick(NUCLEI);
+    wantC = !wantC;
+  }
+  if(!isVowelChar(n.slice(-1))){ if(Math.random() < 0.6) n += pick(NUCLEI); }  // soften a hard ending
+  else if(Math.random() < 0.45) n += pick(CODA);                              // or add a coda
+  return n;
+}
+
+function okName(name){
+  if(name.length < 4 || name.length > 12) return false;
+  if(/(.)\1\1/.test(name)) return false;        // no triple-repeated letters
+  if(/[^aeiou]{4,}/.test(name)) return false;   // no 4+ consonants in a row
+  if(!/[aeiou]/.test(name)) return false;       // must contain a vowel
+  return true;
+}
+
+const targetVal = sel => { const v = $(sel).value; return v === '' ? null : +v; };
+
+function generateNames(){
+  const tExp = targetVal('#g-exp'), tSoul = targetVal('#g-soul'), tPers = targetVal('#g-pers');
+  const prefix = $('#g-prefix').value.trim().replace(/[^a-zA-Z]/g,'');
+  const WANT = 12, MAX = 80000;
+  const seen = new Set(), out = [];
+  for(let i = 0; i < MAX && out.length < WANT; i++){
+    const raw = makeName(prefix);
+    if(!okName(raw) || seen.has(raw)) continue;
+    seen.add(raw);
+    const r = analyze(raw, genSys);
+    if(tExp  !== null && r.destiny.num     !== tExp ) continue;
+    if(tSoul !== null && r.soul.num        !== tSoul) continue;
+    if(tPers !== null && r.personality.num !== tPers) continue;
+    out.push({
+      name: raw.charAt(0).toUpperCase() + raw.slice(1),
+      exp:  r.destiny.num, soul: r.soul.num, pers: r.personality.num
+    });
+  }
+  return out;
+}
+
+function renderGen(list){
+  const box = $('#genResults');
+  if(!list.length){
+    box.innerHTML = `<div class="gen-empty">No names matched those numbers. Try setting fewer targets,
+      a shorter prefix, or the other number system — remember Soul&nbsp;+&nbsp;Personality together
+      determine Expression, so some triple-combinations simply can’t exist.</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="section-title">${list.length} matching name${list.length>1?'s':''}</div><div id="genList"></div>`;
+  $('#genList').innerHTML = list.map(g => {
+    const domain = g.name.toLowerCase() + '.com';
+    return `<div class="gname">
+        <div class="nm">${g.name}</div>
+        <div class="chips">
+          <span class="chip">Exp <b>${g.exp}</b></span>
+          <span class="chip">Soul <b>${g.soul}</b></span>
+          <span class="chip">Pers <b>${g.pers}</b></span>
+        </div>
+        <div class="dom" data-domain="${domain}">
+          <span class="stat un"><span class="spinner"></span>&nbsp;checking .com</span>
+        </div>
+      </div>`;
+  }).join('');
+  list.forEach(g => checkDomain(g.name.toLowerCase() + '.com'));
+}
+
+async function checkDomain(domain){
+  const cell = document.querySelector(`.dom[data-domain="${domain}"]`);
+  if(!cell) return;
+  const buy = 'https://www.namecheap.com/domains/registration/results/?domain=' + domain;
+  let state = 'unknown';
+  try{
+    const res = await fetch(`https://dns.google/resolve?name=${domain}&type=NS`, {cache:'no-store'});
+    const j = await res.json();
+    if(j.Status === 3) state = 'available';                              // NXDOMAIN -> not registered
+    else if(j.Status === 0 && j.Answer && j.Answer.length) state = 'taken';
+  }catch(e){ state = 'error'; }
+  const M = {
+    available:['ok','.com is free',    'Register ↗'],
+    taken:    ['no','.com is taken',   'Check ↗'],
+    unknown:  ['un','.com status n/a',  'Check ↗'],
+    error:    ['un','check unavailable','Check ↗']
+  };
+  const [cls,label,cta] = M[state];
+  cell.innerHTML = `<span class="stat ${cls}">${label}</span>
+    <a href="${buy}" target="_blank" rel="noopener">${cta}</a>`;
+}
+
+$('#g-run').addEventListener('click', () => {
+  const btn = $('#g-run');
+  btn.disabled = true;
+  $('#genResults').innerHTML = `<div class="gen-empty"><span class="spinner"></span>&nbsp; Searching for names that match…</div>`;
+  setTimeout(() => {                       // let the spinner paint before the (sync) search
+    renderGen(generateNames());
+    btn.disabled = false;
+  }, 30);
+});
+$('#g-prefix').addEventListener('keydown', e => { if(e.key === 'Enter') $('#g-run').click(); });
 </script>
 </body>
 </html>
