@@ -230,6 +230,9 @@
   .dom a:hover{background:rgba(200,162,75,.12)}
   .gen-empty{text-align:center;color:var(--ivory-dim);padding:26px 18px;font-size:.95rem;
     background:var(--indigo-2);border:1px solid var(--indigo-3);border-radius:14px}
+  .gen-note{background:rgba(200,162,75,.1);border:1px solid rgba(200,162,75,.35);color:var(--ivory);
+    border-radius:12px;padding:13px 16px;font-size:.88rem;margin-bottom:18px;line-height:1.55}
+  .gen-note b{color:var(--gold)}
   .spinner{
     width:13px;height:13px;border:2px solid var(--indigo-3);border-top-color:var(--emerald);
     border-radius:50%;display:inline-block;vertical-align:-2px;animation:spin .7s linear infinite;
@@ -585,20 +588,19 @@ function okName(name){
 }
 
 const targetVal = sel => { const v = $(sel).value; return v === '' ? null : +v; };
+const LABEL = {exp:'Expression', soul:'Soul Urge', pers:'Personality'};
 
-function generateNames(){
-  const tExp = targetVal('#g-exp'), tSoul = targetVal('#g-soul'), tPers = targetVal('#g-pers');
-  const prefix = $('#g-prefix').value.trim().replace(/[^a-zA-Z]/g,'');
-  const WANT = 12, MAX = 80000;
+// Search for names matching the given constraints ({exp,soul,pers}, null = any)
+function searchNames(cons, prefix, want, max){
   const seen = new Set(), out = [];
-  for(let i = 0; i < MAX && out.length < WANT; i++){
+  for(let i = 0; i < max && out.length < want; i++){
     const raw = makeName(prefix);
     if(!okName(raw) || seen.has(raw)) continue;
     seen.add(raw);
     const r = analyze(raw, genSys);
-    if(tExp  !== null && r.destiny.num     !== tExp ) continue;
-    if(tSoul !== null && r.soul.num        !== tSoul) continue;
-    if(tPers !== null && r.personality.num !== tPers) continue;
+    if(cons.exp  !== null && r.destiny.num     !== cons.exp ) continue;
+    if(cons.soul !== null && r.soul.num        !== cons.soul) continue;
+    if(cons.pers !== null && r.personality.num !== cons.pers) continue;
     out.push({
       name: raw.charAt(0).toUpperCase() + raw.slice(1),
       exp:  r.destiny.num, soul: r.soul.num, pers: r.personality.num
@@ -607,7 +609,37 @@ function generateNames(){
   return out;
 }
 
-function renderGen(list){
+function generateNames(){
+  const cons = {exp: targetVal('#g-exp'), soul: targetVal('#g-soul'), pers: targetVal('#g-pers')};
+  const prefix = $('#g-prefix').value.trim().replace(/[^a-zA-Z]/g,'');
+
+  // 1) Try to match everything the user asked for.
+  let names = searchNames(cons, prefix, 12, 80000);
+  if(names.length) return {names, note: null};
+
+  // 2) Impossible/over-constrained — relax one number at a time so we still return the closest names.
+  // Drop the least-important target first (Soul, then Personality), keeping Expression if we can.
+  const active = ['exp','soul','pers'].filter(k => cons[k] !== null);
+  const dropOrder = ['soul','pers','exp'].filter(k => cons[k] !== null);
+  if(active.length >= 2){
+    for(const drop of dropOrder){
+      const c2 = {...cons}; c2[drop] = null;
+      const r = searchNames(c2, prefix, 12, 80000);
+      if(r.length){
+        return {
+          names: r,
+          note: `No single name can be ${active.map(k => LABEL[k] + ' ' + cons[k]).join(', ')} all at once — ` +
+                `a name's Soul (vowels) and Personality (consonants) always add up to its Expression, so those numbers are linked. ` +
+                `Showing the closest matches, with <b>${LABEL[drop]}</b> left free:`
+        };
+      }
+    }
+  }
+  return {names: [], note: null};
+}
+
+function renderGen(result){
+  const list = result.names;
   const box = $('#genResults');
   if(!list.length){
     box.innerHTML = `<div class="gen-empty">No names matched those numbers. Try setting fewer targets,
@@ -615,7 +647,9 @@ function renderGen(list){
       determine Expression, so some triple-combinations simply can’t exist.</div>`;
     return;
   }
-  box.innerHTML = `<div class="section-title">${list.length} matching name${list.length>1?'s':''}</div><div id="genList"></div>`;
+  const banner = result.note ? `<div class="gen-note">${result.note}</div>` : '';
+  const heading = result.note ? 'closest' : 'matching';
+  box.innerHTML = banner + `<div class="section-title">${list.length} ${heading} name${list.length>1?'s':''}</div><div id="genList"></div>`;
   $('#genList').innerHTML = list.map(g => {
     const domain = g.name.toLowerCase() + '.com';
     return `<div class="gname">
